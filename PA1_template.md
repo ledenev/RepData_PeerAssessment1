@@ -1,12 +1,8 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 Let's start with loading of libraries needed to this project.
-```{r, results='hide', message=FALSE}
+
+```r
 library(dplyr)
 library(lubridate)
 library(lattice)    
@@ -14,7 +10,8 @@ library(lattice)
 
 ## Loading and preprocessing the data
 
-```{r}
+
+```r
 zipfile <- "activity.zip"
 src <- "activity.csv"
 activity_tbl <- read.csv(unz(zipfile, src),
@@ -24,7 +21,8 @@ activity_tbl <- read.csv(unz(zipfile, src),
 ## What is mean total number of steps taken per day?
 
 Now, we define two functions which will be called for more than once. First function calculates the total number of steps taken per day, and second function draws a histogram of the total number of steps taken each day.
-```{r}
+
+```r
 create_daily_tbl <- function(activity) {
     activity %>%
         select(date, steps) %>%
@@ -42,25 +40,30 @@ draw_daily_hist <- function(daily) {
 }
 ```
 
-```{r}
+
+```r
 daily <- create_daily_tbl(activity_tbl)
 draw_daily_hist(daily)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
 #### Calculate and report the mean and median of the total number of steps taken per day
-```{r}
+
+```r
 steps_mean   <- sprintf("%.2f", mean(daily$steps))
 steps_median <- sprintf("%.2f", median(daily$steps))
 ```
 
 _________________________
-#### Mean number of steps is `r steps_mean`, and median number is `r steps_median`.
+#### Mean number of steps is 10766.19, and median number is 10765.00.
 
 _________________________
 
 ## What is the average daily activity pattern?
 
-```{r}
+
+```r
 create_time_series <- function(activity) {
     time_series <- activity %>%
         filter(!is.na(steps)) %>%
@@ -80,32 +83,37 @@ plot(time_series$series_as_date, time_series$steps_mean, type="l", col="blue",
      xlab="Time", ylab="Average number of steps")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+
 #### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-```{r}
+
+```r
 index <- which(time_series$steps_mean == max(time_series$steps_mean))
 max_start <- format(time_series$series_as_date[index], "%l:%M %p")
 max_end   <- format(time_series$series_as_date[index+1], "%l:%M %p")
 ```
 
 _________________________
-#### Maximum number of steps has been taken in the time interval from `r max_start` to `r max_end`.
+#### Maximum number of steps has been taken in the time interval from  8:35 AM to  8:40 AM.
 
 _________________________
 
 ## Imputing missing values
 #### Calculate and report the total number of missing values in the dataset.
-```{r}
+
+```r
 rows_with_na <- activity_tbl[is.na(activity_tbl[,"steps"]),]
 num_rows_with_na <- nrow(rows_with_na)
 ```
 
 _________________________
-#### Number of rows with NA is `r num_rows_with_na`.
+#### Number of rows with NA is 2304.
 
 _________________________
 
 For imputing missing values, we substitute 5-minute NA with mean number of step taken on all other days at the same 5-minute interval.
-```{r}
+
+```r
 rows_with_na <- rows_with_na %>% mutate(series = as.factor(sprintf("%04d", interval)))
 tmp <- merge(rows_with_na, time_series, by="series")
 rows_subst_na <- tmp[,c("steps_mean", "date", "interval")]
@@ -116,25 +124,30 @@ activity_tbl_mod <- rbind(rows_without_na, rows_subst_na) %>% arrange(date, inte
 ```
 
 We re-use two functions which were defined upper.
-```{r}
+
+```r
 daily <- create_daily_tbl(activity_tbl_mod)
 draw_daily_hist(daily)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
+
 #### Calculate and report the mean and median total number of steps taken per day.
-```{r}
+
+```r
 steps_mean   <- sprintf("%.2f", mean(daily$steps))
 steps_median <- sprintf("%.2f", median(daily$steps))
 ```
 
 _________________________
-#### Mean number of steps taken per day is `r steps_mean`, and median number is `r steps_median`.
+#### Mean number of steps taken per day is 10766.19, and median number is 10766.19.
 
 _________________________
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r}
+
+```r
 trans <- function(d) {
     if (weekdays.Date(d) %in% c("Saturday", "Sunday")) "weekend" else "weekday"
 }
@@ -151,16 +164,20 @@ time_series <- rbind(tms_weekdays, tms_weekend)
 time_series$day <- as.factor(time_series$day)
 ```
 
-```{r}
+
+```r
 time_series$series <- sapply(time_series$series, as.character)
 time_series$series <- sapply(time_series$series, as.integer)
 ```
 
-```{r}
+
+```r
 p <- xyplot(steps_mean ~ series | day, data = time_series,
         layout=c(1, 2), type="l",
         xlab="Interval", ylab="Average number of steps")
 print(p)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-14-1.png) 
 
 #### Yes, difference in activity patterns between weekdays and weekends is clearly visible.
