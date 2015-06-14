@@ -1,4 +1,4 @@
-# "Reproducible Research: Peer Assessment 1"
+# Reproducible Research: Peer Assessment 1
 
 Let's start with loading of libraries needed to this project.
 
