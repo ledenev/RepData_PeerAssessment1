@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# "Reproducible Research: Peer Assessment 1"
 
 Let's start with loading of libraries needed to this project.
 
